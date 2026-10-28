@@ -1,0 +1,680 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Presentasi Senilai Berbalik Nilai</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: satu slide per layar, panah/keyboard untuk maju. Biru = senilai, jingga = berbalik nilai. Elemen bertanda .b muncul satu per satu saat maju. */
+:root {
+  --bg: #FBF6EE; --surface: #FFFDF8; --alt: #F3EADB; --ink: #1E2A47; --muted: #4A5568; --line: #E6DCC8;
+  --blue: #1D55B0; --blue-fill: #2563C4; --blue-soft: #DCE6F8;
+  --orange: #A04808; --orange-fill: #B8500A; --orange-soft: #FBE2CA;
+  --navy: #1E2A47; --on-navy: #FBF6EE; --on-navy-2: #C9D3EA;
+  --on-fill: #FFFDF8; --ok: #1F7A3F; --ok-soft: #DDF3E4; --bad: #B42318; --bad-soft: #FBE2DF;
+  --pink: #E0457B; --gold: #F2A33A;
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121C33; --surface: #1B2A4A; --alt: #172440; --ink: #EEF2FB; --muted: #B4C0DA; --line: #2F4170;
+    --blue: #8DB4FF; --blue-fill: #2F66CC; --blue-soft: #1F3560;
+    --orange: #FFB070; --orange-fill: #B8500A; --orange-soft: #43301F;
+    --navy: #0B1428; --on-navy: #EEF2FB; --on-navy-2: #B4C0DA;
+    --on-fill: #FFFDF8; --ok: #6EE7A0; --ok-soft: #12372A; --bad: #FF8A80; --bad-soft: #3E1D1B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121C33; --surface: #1B2A4A; --alt: #172440; --ink: #EEF2FB; --muted: #B4C0DA; --line: #2F4170;
+  --blue: #8DB4FF; --blue-fill: #2F66CC; --blue-soft: #1F3560;
+  --orange: #FFB070; --orange-fill: #B8500A; --orange-soft: #43301F;
+  --navy: #0B1428; --on-navy: #EEF2FB; --on-navy-2: #B4C0DA;
+  --on-fill: #FFFDF8; --ok: #6EE7A0; --ok-soft: #12372A; --bad: #FF8A80; --bad-soft: #3E1D1B;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 18px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0; display: flex; flex-direction: column; overflow: hidden;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--blue-fill); outline-offset: 2px; }
+button { font: inherit; }
+
+.stage { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.slide { max-width: 1120px; min-height: 100%; margin: 0 auto; padding: 24px 0 28px; display: grid; gap: 18px; align-content: center; }
+.slide.enter { animation: enter .45s ease both; }
+@keyframes enter { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+.b { opacity: 0; transform: translateY(14px); transition: opacity .45s, transform .45s; pointer-events: none; }
+.b.on { opacity: 1; transform: none; pointer-events: auto; }
+
+.eyebrow { font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.eyebrow.o { color: var(--orange); }
+h2 { font-size: clamp(28px, 4.4vw, 46px); }
+.lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+.cols.w { grid-template-columns: 1.1fr .9fr; }
+@media (max-width: 800px) { .cols, .cols3, .cols.w { grid-template-columns: 1fr; } }
+.stack { display: grid; gap: 12px; align-content: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; gap: 10px; align-content: start; }
+.card h3 { font-size: 24px; }
+.card.a { background: var(--blue-soft); border-color: transparent; }
+.card.o { background: var(--orange-soft); border-color: transparent; }
+.tag { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.tag.o { color: var(--orange); }
+.num { font-family: var(--font-display); font-size: 40px; line-height: 1; color: var(--blue); }
+.num.o { color: var(--orange); }
+.formula { background: var(--blue-fill); color: var(--on-fill); border-radius: 14px; padding: 14px 20px; }
+.formula.o { background: var(--orange-fill); }
+.formula .f { font-family: var(--font-display); font-size: 40px; line-height: 1.1; }
+.formula p.d { font-size: 16px; }
+.bk { display: inline-block; background: var(--surface); border-radius: 8px; padding: 0 8px; font-weight: 800; }
+
+.fr { display: inline-flex; flex-direction: column; align-items: stretch; text-align: center; line-height: 1.2; vertical-align: middle; font-weight: 800; }
+.fr > span:first-child { border-bottom: 3px solid currentColor; padding: 0 8px 2px; }
+.fr > span:last-child { padding: 2px 8px 0; }
+.math { font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.btn { font-weight: 800; border: 0; border-radius: 12px; padding: 12px 22px; cursor: pointer; background: var(--blue-fill); color: var(--on-fill); justify-self: start; }
+.btn.o { background: var(--orange-fill); }
+.btn.big { font-size: 20px; padding: 14px 28px; }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { font-weight: 800; cursor: pointer; padding: 8px 16px; border-radius: 99px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+.chips button:hover:not(:disabled) { border-color: var(--blue-fill); }
+.chips button[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue-fill); }
+.chips button.good { background: var(--ok-soft); border-color: var(--ok); }
+.chips button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+.fb { font-size: 16px; font-weight: 700; }
+.fb.ok { color: var(--ok); } .fb.bad { color: var(--bad); }
+
+.lab { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 18px; display: grid; gap: 12px; align-content: start; }
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.cap { font-size: 14px; font-weight: 700; color: var(--muted); }
+.big { font-family: var(--font-display); font-size: 48px; line-height: 1; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--blue-fill); height: 30px; }
+.lab.o input[type="range"] { accent-color: var(--orange-fill); }
+.items { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; min-height: 58px; }
+.readout { border-radius: 12px; padding: 10px 14px; font-weight: 800; background: var(--blue-soft); font-variant-numeric: tabular-nums; }
+.lab.o .readout { background: var(--orange-soft); }
+.candy { width: 34px; height: 20px; border-radius: 10px; background: var(--pink); position: relative; margin-inline: 12px; animation: pop .35s both; }
+.candy::before, .candy::after { content: ""; position: absolute; top: 1px; border-top: 9px solid transparent; border-bottom: 9px solid transparent; }
+.candy::before { left: -11px; border-right: 11px solid var(--pink); }
+.candy::after { right: -11px; border-left: 11px solid var(--pink); }
+.coin { width: 28px; height: 28px; border-radius: 50%; background: var(--gold); border: 3px solid var(--orange-fill); animation: pop .35s both; }
+.per { width: 24px; height: 48px; position: relative; animation: pop .35s both; }
+.per::before { content: ""; position: absolute; left: 4px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--orange-fill); }
+.per::after { content: ""; position: absolute; left: 0; top: 19px; width: 24px; height: 29px; border-radius: 12px 12px 3px 3px; background: var(--orange-fill); }
+@keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.track { height: 28px; background: var(--orange-soft); border-radius: 10px; overflow: hidden; }
+.fill { height: 100%; width: 50%; background: var(--orange-fill); border-radius: 10px; transition: width .6s ease; }
+.lab.o .track { background: var(--alt); }
+.arrows { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-weight: 800; }
+.arr { display: inline-block; width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; vertical-align: middle; }
+.arr.up { border-bottom: 22px solid var(--blue-fill); animation: bob 1.4s ease-in-out infinite; }
+.arr.up.o { border-bottom-color: var(--orange-fill); }
+.arr.dn { border-top: 22px solid var(--orange-fill); animation: bob2 1.4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+@keyframes bob2 { 50% { transform: translateY(5px); } }
+
+.bars { display: grid; gap: 8px; }
+.bar { display: flex; gap: 3px; height: 34px; }
+.bar span { flex: 1; border: 2px solid var(--blue-fill); border-radius: 4px; background: var(--surface); transition: background .3s; }
+.bar span.f { background: var(--blue-fill); }
+input.num-in { font: inherit; font-weight: 800; width: 100px; text-align: center; padding: 8px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); }
+input.num-in.ok { border-color: var(--ok); background: var(--ok-soft); }
+input.num-in.bad { border-color: var(--bad); background: var(--bad-soft); }
+.ans { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 800; }
+details { border-radius: 12px; background: var(--alt); padding: 8px 12px; }
+details summary { cursor: pointer; font-weight: 800; }
+details p { margin-top: 6px; font-size: 16px; }
+
+.svg-wrap svg { width: 100%; max-width: 380px; height: auto; display: block; }
+.gax { stroke: var(--ink); stroke-width: 2; fill: none; }
+.gtxt { fill: var(--muted); font-size: 13px; font-family: var(--font-body); font-weight: 700; }
+
+.cover { align-content: center; }
+.hero { position: relative; overflow: hidden; background: var(--navy); color: var(--on-navy); border-radius: 28px; padding: clamp(24px, 5vw, 56px); display: grid; gap: 16px; }
+.hero > * { position: relative; z-index: 1; }
+.hero .kick { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #FFB070; }
+.hero h1 { font-size: clamp(36px, 7vw, 78px); max-width: 14ch; }
+.hero .sub { font-size: clamp(18px, 2.2vw, 24px); color: var(--on-navy-2); max-width: 36ch; }
+.hero .fc { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .fc div { border-radius: 16px; padding: 12px 18px; background: rgba(255,255,255,.08); border: 2px solid #8DB4FF; }
+.hero .fc div.o { border-color: #FFB070; }
+.hero .fc b { font-family: var(--font-display); font-size: 30px; font-weight: 600; }
+.hero .fc small { display: block; font-size: 15px; color: var(--on-navy-2); }
+.fl { position: absolute !important; z-index: 0 !important; opacity: .9; animation: floaty 6s ease-in-out infinite; }
+@keyframes floaty { 50% { transform: translateY(-16px) rotate(8deg); } }
+
+.rows { display: grid; gap: 10px; }
+.gq { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.gq .t { font-weight: 800; flex: 1 1 260px; }
+.gq .fb { flex-basis: 100%; }
+.score { font-weight: 800; font-size: 20px; }
+.final { background: var(--navy); color: var(--on-navy); border-radius: 16px; padding: 16px 20px; font-family: var(--font-display); font-size: clamp(20px, 2.6vw, 26px); line-height: 1.3; }
+ul.cl { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+.bar-nav { flex: none; margin: 6px 0 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; position: relative; }
+.bar-nav .nb { white-space: nowrap; font-weight: 800; border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; background: var(--blue-fill); color: var(--on-fill); }
+.bar-nav .nb.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); padding: 8px 12px; }
+.bar-nav .nb:disabled { opacity: .45; cursor: default; }
+.pbar { flex: 1; height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; min-width: 40px; }
+.pbar i { display: block; height: 100%; width: 0; background: var(--blue-fill); transition: width .3s; }
+.count { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.menu { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px; max-height: 60vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; z-index: 20; box-shadow: 0 8px 30px rgba(0,0,0,.18); }
+.menu button { text-align: left; font-weight: 700; padding: 8px 12px; border-radius: 10px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.menu button:hover, .menu button.on { background: var(--blue-soft); }
+@media (max-width: 560px) { .bar-nav .hide-s { display: none; } }
+@media (prefers-reduced-motion: reduce) { .slide.enter, .candy, .coin, .per, .arr, .fl { animation: none; } .b, .fill, .bar span { transition: none; } }
+</style>
+
+<main class="stage" id="stage">
+
+<!-- 1 COVER -->
+<section class="slide cover" id="s1" data-title="Cover">
+  <div class="hero">
+    <div class="candy fl" style="right:8%;top:12%"></div>
+    <div class="candy fl" style="right:22%;top:62%;animation-delay:-2s"></div>
+    <div class="candy fl" style="right:5%;top:75%;animation-delay:-4s"></div>
+    <p class="kick">Matematika · Kelas VII · SMPIT Ibadurrahman</p>
+    <h1>Perbandingan Senilai dan Berbalik Nilai</h1>
+    <p class="sub">Kita belajar dari dua cerita: membeli permen dan mengecat sekolah kita.</p>
+    <div class="fc">
+      <div><b>y = kx</b><small>Senilai: hasil bagi tetap</small></div>
+      <div class="o"><b>y = k ÷ x</b><small>Berbalik nilai: hasil kali tetap</small></div>
+    </div>
+    <button class="btn big" data-go="next" type="button">Mulai belajar</button>
+  </div>
+</section>
+
+<!-- 2 TUJUAN -->
+<section class="slide" id="s2" data-title="Tujuan pembelajaran" hidden>
+  <p class="eyebrow">Tujuan pembelajaran</p>
+  <h2>Setelah pelajaran ini, kamu bisa</h2>
+  <div class="cols3">
+    <div class="card b" data-b="1"><p class="num">1</p><h3>Mengenali</h3><p class="lead">Menjelaskan perbedaan perbandingan senilai dan berbalik nilai beserta cirinya.</p></div>
+    <div class="card b" data-b="2"><p class="num">2</p><h3>Menghitung</h3><p class="lead">Menyelesaikan soal dengan tiga langkah: buat perbandingan, kali silang, hitung nilai x.</p></div>
+    <div class="card b" data-b="3"><p class="num">3</p><h3>Menerapkan</h3><p class="lead">Memakai keduanya untuk masalah sehari-hari seperti harga barang dan lama pekerjaan.</p></div>
+  </div>
+</section>
+
+<!-- 3 PEMANTIK -->
+<section class="slide" id="s3" data-title="Pertanyaan pemantik" hidden>
+  <p class="eyebrow">Pertanyaan pemantik</p>
+  <h2>Dua masalah untuk kita pikirkan</h2>
+  <div class="cols">
+    <div class="card a b" data-b="1">
+      <span class="tag">Masalah 1</span>
+      <p style="font-size:clamp(18px,2.2vw,22px)">Kaka punya <b>3 permen</b>, harganya <b>Rp 2.000</b>. Kalau Kaka mau beli <b>30 permen</b> untuk semua siswa di sini, berapa harganya?</p>
+      <div class="items" aria-hidden="true"><div class="candy"></div><div class="candy"></div><div class="candy"></div><div class="coin"></div><div class="coin"></div></div>
+    </div>
+    <div class="card o b" data-b="2">
+      <span class="tag o">Masalah 2</span>
+      <p style="font-size:clamp(18px,2.2vw,22px)">Ceritanya kita mau cat ulang SMPIT Ibadurrahman. Awalnya yang bekerja <b>5 orang</b> dan akan selesai dalam <b>8 hari</b>. Karena sekolah hanya libur <b>2 hari</b> (Sabtu dan Minggu), berapa pekerja yang dibutuhkan agar selesai dalam 2 hari?</p>
+      <div class="items" aria-hidden="true"><div class="per"></div><div class="per"></div><div class="per"></div><div class="per"></div><div class="per"></div></div>
+    </div>
+  </div>
+  <p class="lead b" data-b="3">Tulis tebakanmu dulu. Jawabannya kita buktikan di contoh soal nanti.</p>
+</section>
+
+<!-- 4 PECAHAN -->
+<section class="slide" id="s4" data-title="Menyamakan pecahan" hidden>
+  <p class="eyebrow">Mengingat kembali</p>
+  <h2>Menyamakan pecahan</h2>
+  <div class="cols">
+    <div class="lab">
+      <p class="lead">Pecahan 2/3. Pilih pengali, lalu lihat pecahan yang sama nilainya.</p>
+      <div class="chips" id="fk" role="group" aria-label="Pengali">
+        <button type="button" data-k="1" aria-pressed="true">× 1</button><button type="button" data-k="2" aria-pressed="false">× 2</button><button type="button" data-k="3" aria-pressed="false">× 3</button><button type="button" data-k="4" aria-pressed="false">× 4</button><button type="button" data-k="5" aria-pressed="false">× 5</button>
+      </div>
+      <div class="bars"><div class="bar" id="bar1" aria-hidden="true"></div><div class="bar" id="bar2" aria-hidden="true"></div></div>
+      <p class="readout" id="frR"></p>
+    </div>
+    <div class="stack">
+      <div class="card b" data-b="1"><h3>Cara menyamakan</h3>
+        <p>Kalikan atau bagi pembilang dan penyebut dengan bilangan yang sama.</p>
+        <div class="math"><span class="fr"><span>3</span><span>30</span></span> = <span class="fr"><span>3 ÷ 3</span><span>30 ÷ 3</span></span> = <span class="fr"><span>1</span><span>10</span></span></div>
+      </div>
+      <div class="card b" data-b="2"><h3>Kali silang</h3>
+        <p>Jika dua pecahan sama nilainya, hasil kali silangnya sama.</p>
+        <div class="math"><span class="fr"><span>a</span><span>b</span></span> = <span class="fr"><span>c</span><span>d</span></span> <span>maka a × d = b × c</span></div>
+      </div>
+      <div class="card b" data-b="3"><h3>Coba sendiri</h3>
+        <div class="ans"><span class="fr"><span>3</span><span>4</span></span> = <span class="fr"><span>x</span><span>12</span></span> <span>, x =</span> <input class="num-in" id="q4" inputmode="decimal" autocomplete="off" aria-label="Nilai x"> <button class="btn" type="button" data-chk="q4" data-ans="9">Periksa</button></div>
+        <p class="fb" id="f-q4"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 APA ITU SENILAI -->
+<section class="slide" id="s5" data-title="Apa itu senilai?" hidden>
+  <p class="eyebrow">Perbandingan senilai</p>
+  <h2>Apa itu perbandingan senilai?</h2>
+  <div class="cols">
+    <div class="stack">
+      <div class="card a b" data-b="1"><span class="tag">Pengertian</span>
+        <p style="font-size:clamp(18px,2.2vw,22px)">Perbandingan senilai adalah perbandingan dua besaran yang <b>berubah searah</b>. Jika satu besaran bertambah, besaran lainnya ikut bertambah. Jika satu berkurang, yang lain ikut berkurang.</p></div>
+      <div class="formula b" data-b="2"><p class="f">y = kx</p><p class="d">k adalah hasil bagi y ÷ x yang selalu tetap</p></div>
+    </div>
+    <div class="lab">
+      <div class="arrows"><span>Banyak permen</span><span class="arr up"></span><span>Harga</span><span class="arr up"></span></div>
+      <div class="head"><div><p class="cap">Permen</p><p class="big" id="n5">3</p></div><div style="text-align:right"><p class="cap">Harga (Rp)</p><p class="big" id="h5">2.000</p></div></div>
+      <div class="items" id="c5" aria-hidden="true"></div>
+      <div class="items" id="k5" aria-hidden="true"></div>
+      <p class="cap">Satu koin = Rp 1.000. Animasi berjalan sendiri.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 CIRI SENILAI -->
+<section class="slide" id="s6" data-title="Ciri-ciri senilai" hidden>
+  <p class="eyebrow">Perbandingan senilai</p>
+  <h2>Bagaimana ciri-cirinya?</h2>
+  <div class="cols">
+    <div class="stack">
+      <div class="card a b" data-b="1"><span class="tag">Ciri 1</span><p><b>Searah.</b> Naik bersama atau turun bersama.</p></div>
+      <div class="card a b" data-b="2"><span class="tag">Ciri 2</span><p><b>Hasil bagi tetap.</b> y ÷ x selalu sama.</p></div>
+      <div class="card a b" data-b="3"><span class="tag">Ciri 3</span><p><b>Rumus</b> y = kx, atau x1 : x2 = y1 : y2.</p></div>
+      <div class="card a b" data-b="4"><span class="tag">Ciri 4</span><p><b>Grafik</b> berupa garis lurus yang melalui titik (0, 0).</p></div>
+    </div>
+    <div class="lab">
+      <p class="lead">Geser jumlah permen. Cek hasil baginya.</p>
+      <div class="head"><div><p class="cap">Permen</p><p class="big" id="n6">3</p></div><div style="text-align:right"><p class="cap">Harga (Rp)</p><p class="big" id="h6">2.000</p></div></div>
+      <input type="range" id="rg6" min="3" max="30" step="3" value="3" aria-label="Banyak permen">
+      <div class="items" id="c6" aria-hidden="true"></div>
+      <div class="items" id="k6" aria-hidden="true"></div>
+      <p class="readout" id="r6"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 CARA SENILAI -->
+<section class="slide" id="s7" data-title="Cara menghitung senilai" hidden>
+  <p class="eyebrow">Perbandingan senilai</p>
+  <h2>Bagaimana cara menghitungnya?</h2>
+  <div class="cols3">
+    <div class="card b" data-b="1"><span class="tag">Langkah 1</span><h3>Buat perbandingan</h3>
+      <div class="math"><span class="fr"><span>x<small>1</small></span><span>x<small>2</small></span></span> = <span class="fr"><span>y<small>1</small></span><span>y<small>2</small></span></span></div>
+      <p>Urutannya sama: permen di atas permen, harga di atas harga.</p></div>
+    <div class="card b" data-b="2"><span class="tag">Langkah 2</span><h3>Kali silang</h3>
+      <p class="math">x<small>1</small> × y<small>2</small> = x<small>2</small> × y<small>1</small></p>
+      <p>Kalikan pembilang dengan penyebut di seberangnya.</p></div>
+    <div class="card a b" data-b="3"><span class="tag">Langkah 3</span><h3>Hitung nilai yang dicari</h3>
+      <p>Bagi kedua ruas dengan bilangan yang menempel pada nilai yang dicari.</p></div>
+  </div>
+  <div class="card o b" data-b="4"><span class="tag o">Kunci</span><p style="font-size:clamp(18px,2.2vw,22px)">Pada senilai, <b>urutan kedua pecahan sama</b>. Contoh nanti: <span class="fr"><span>3</span><span>30</span></span> = <span class="fr"><span>2.000</span><span>x</span></span></p></div>
+</section>
+
+<!-- 8 PEMANTIK SENILAI -->
+<section class="slide" id="s8" data-title="Masalah 1 adalah senilai" hidden>
+  <p class="eyebrow">Kembali ke pertanyaan pemantik</p>
+  <h2>Masalah 1 merupakan perbandingan senilai karena...</h2>
+  <div class="cols">
+    <div class="lab">
+      <p class="lead">Dari 3 permen menjadi 30 permen, harganya akan ...</p>
+      <div class="chips" id="q8" role="group" aria-label="Pilih jawaban">
+        <button type="button" data-v="naik">ikut naik</button><button type="button" data-v="turun">turun</button><button type="button" data-v="tetap">tetap</button>
+      </div>
+      <p class="fb" id="f-q8"></p>
+    </div>
+    <div class="stack">
+      <div class="card a b" data-b="1"><p><b>Searah.</b> Banyak permen naik dari 3 menjadi 30, harganya ikut naik.</p></div>
+      <div class="card a b" data-b="2"><p><b>Rasio tetap.</b> 30 permen adalah 10 kali lipat dari 3 permen, jadi harganya juga 10 kali lipat dari Rp 2.000.</p></div>
+      <div class="formula b" data-b="3"><p class="f">Jadi: senilai</p><p class="d">Hasil bagi harga ÷ permen selalu tetap</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 CONTOH SENILAI -->
+<section class="slide" id="s9" data-title="Contoh soal senilai" hidden>
+  <p class="eyebrow">Contoh soal senilai</p>
+  <h2>Harga 30 permen</h2>
+  <div class="card a"><span class="tag">Soal</span><p style="font-size:clamp(18px,2.2vw,22px)">Harga 3 permen Rp 2.000. Berapa harga 30 permen?</p></div>
+  <div class="cols3">
+    <div class="card b" data-b="1"><span class="tag">Langkah 1</span><h3>Buat perbandingan</h3>
+      <div class="math"><span class="fr"><span>3</span><span>30</span></span> = <span class="fr"><span>2.000</span><span>x</span></span></div>
+      <p>Senilai, urutan sama.</p></div>
+    <div class="card b" data-b="2"><span class="tag">Langkah 2</span><h3>Kali silang</h3>
+      <p class="math">3 × x = 30 × 2.000</p><p class="math">3x = 60.000</p></div>
+    <div class="card a b" data-b="3"><span class="tag">Langkah 3</span><h3>Hitung nilai x</h3>
+      <div class="math">x = <span class="fr"><span>60.000</span><span>3</span></span> = 20.000</div></div>
+  </div>
+  <div class="cols">
+    <div class="formula b" data-b="4"><p class="f">Rp 20.000</p><p class="d">Harga 30 permen untuk semua siswa</p></div>
+    <div class="card o b" data-b="5"><span class="tag o">Cara cepat</span><p>30 ÷ 3 = 10, jadi harganya 10 × Rp 2.000 = Rp 20.000. Hasilnya sama.</p></div>
+  </div>
+</section>
+
+<!-- 10 APA ITU BERBALIK -->
+<section class="slide" id="s10" data-title="Apa itu berbalik nilai?" hidden>
+  <p class="eyebrow o">Perbandingan berbalik nilai</p>
+  <h2>Apa itu perbandingan berbalik nilai?</h2>
+  <div class="cols">
+    <div class="stack">
+      <div class="card o b" data-b="1"><span class="tag o">Pengertian</span>
+        <p style="font-size:clamp(18px,2.2vw,22px)">Perbandingan berbalik nilai adalah perbandingan dua besaran yang <b>berubah berlawanan arah</b>. Jika satu besaran bertambah, besaran lainnya berkurang, dan sebaliknya.</p></div>
+      <div class="formula o b" data-b="2"><p class="f">y = k ÷ x</p><p class="d">atau x × y = k, hasil kali selalu tetap</p></div>
+    </div>
+    <div class="lab o">
+      <div class="arrows"><span>Banyak pekerja</span><span class="arr up o"></span><span>Lama mengecat</span><span class="arr dn"></span></div>
+      <div class="head"><div><p class="cap">Pekerja</p><p class="big" id="n10">5</p></div><div style="text-align:right"><p class="cap">Lama (hari)</p><p class="big" id="t10">8</p></div></div>
+      <div class="items" id="p10" aria-hidden="true"></div>
+      <div class="track" aria-hidden="true"><div class="fill" id="f10"></div></div>
+      <p class="cap">Animasi berjalan sendiri. Makin banyak pekerja, bar waktu makin pendek.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 CIRI BERBALIK -->
+<section class="slide" id="s11" data-title="Ciri-ciri berbalik nilai" hidden>
+  <p class="eyebrow o">Perbandingan berbalik nilai</p>
+  <h2>Bagaimana ciri-cirinya?</h2>
+  <div class="cols">
+    <div class="stack">
+      <div class="card o b" data-b="1"><span class="tag o">Ciri 1</span><p><b>Berlawanan.</b> Satu naik, yang lain turun.</p></div>
+      <div class="card o b" data-b="2"><span class="tag o">Ciri 2</span><p><b>Hasil kali tetap.</b> x × y selalu sama.</p></div>
+      <div class="card o b" data-b="3"><span class="tag o">Ciri 3</span><p><b>Rumus</b> y = k ÷ x, atau x1 : x2 = y2 : y1.</p></div>
+      <div class="card o b" data-b="4"><span class="tag o">Ciri 4</span><p><b>Grafik</b> berupa kurva turun yang tidak menyentuh sumbu.</p></div>
+    </div>
+    <div class="lab o">
+      <p class="lead">Geser jumlah pekerja. Titik bergerak di kurva.</p>
+      <div class="head"><div><p class="cap">Pekerja</p><p class="big" id="n11">5</p></div><div style="text-align:right"><p class="cap">Lama (hari)</p><p class="big" id="t11">8</p></div></div>
+      <input type="range" id="rp11" min="0" max="5" step="1" value="2" aria-label="Jumlah pekerja">
+      <div class="svg-wrap">
+        <svg viewBox="0 0 420 280" role="img" aria-label="Grafik berbalik nilai, kurva turun yang tidak menyentuh sumbu">
+          <path class="gax" d="M40 16 V250 H400"/><polygon points="40,4 34,18 46,18" fill="var(--ink)"/><polygon points="412,250 398,244 398,256" fill="var(--ink)"/>
+          <text class="gtxt" x="50" y="16">lama (hari)</text><text class="gtxt" x="300" y="272">banyak pekerja</text>
+          <polyline id="crv" fill="none" stroke="var(--orange-fill)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" points=""/>
+          <circle id="gp" cx="160" cy="178" r="11" fill="var(--orange-fill)" stroke="var(--surface)" stroke-width="3"/>
+        </svg>
+      </div>
+      <p class="readout" id="r11"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 CARA BERBALIK -->
+<section class="slide" id="s12" data-title="Cara menghitung berbalik nilai" hidden>
+  <p class="eyebrow o">Perbandingan berbalik nilai</p>
+  <h2>Bagaimana cara menghitungnya?</h2>
+  <div class="cols3">
+    <div class="card b" data-b="1"><span class="tag o">Langkah 1</span><h3>Buat perbandingan</h3>
+      <div class="math"><span class="fr"><span>x<small>1</small></span><span>x<small>2</small></span></span> = <span class="fr"><span>y<small>2</small></span><span>y<small>1</small></span></span></div>
+      <p>Salah satu pecahan dibalik.</p></div>
+    <div class="card b" data-b="2"><span class="tag o">Langkah 2</span><h3>Kali silang</h3>
+      <p class="math">x<small>1</small> × y<small>1</small> = x<small>2</small> × y<small>2</small></p>
+      <p>Hasil kali kedua besaran tetap sama.</p></div>
+    <div class="card o b" data-b="3"><span class="tag o">Langkah 3</span><h3>Hitung nilai yang dicari</h3>
+      <p>Bagi kedua ruas dengan bilangan yang menempel pada nilai yang dicari.</p></div>
+  </div>
+  <div class="card a b" data-b="4"><span class="tag">Kunci</span><p style="font-size:clamp(18px,2.2vw,22px)">Pada berbalik nilai, <b>salah satu pecahan dibalik</b>. Contoh nanti: <span class="fr"><span>5</span><span>x</span></span> = <span class="fr"><span>2</span><span>8</span></span></p></div>
+</section>
+
+<!-- 13 PEMANTIK BERBALIK + CONTOH -->
+<section class="slide" id="s13" data-title="Masalah 2 adalah berbalik nilai" hidden>
+  <p class="eyebrow o">Kembali ke pertanyaan pemantik</p>
+  <h2>Masalah 2 merupakan perbandingan berbalik nilai karena...</h2>
+  <div class="cols w">
+    <div class="stack">
+      <div class="card o b" data-b="1"><p><b>Berlawanan.</b> Waktu dari 8 hari menjadi 2 hari, jadi pekerja harus bertambah.</p></div>
+      <div class="card o b" data-b="2"><p><b>Hasil kali tetap.</b> Pekerjaannya sama, jadi pekerja × hari tetap: 5 × 8 = 40.</p></div>
+      <div class="formula o b" data-b="3"><p class="f">Jadi: berbalik nilai</p><p class="d">Hasil kali pekerja × hari selalu tetap</p></div>
+    </div>
+    <div class="card" style="gap:8px">
+      <span class="tag o">Contoh soal</span>
+      <p class="b" data-b="4"><b>1.</b> <span class="fr"><span>5</span><span>x</span></span> = <span class="fr"><span>2</span><span>8</span></span> <small>(dibalik)</small></p>
+      <p class="math b" data-b="5"><span>2.</span> 2 × x = 5 × 8, jadi 2x = 40</p>
+      <p class="math b" data-b="6"><span>3.</span> x = <span class="fr"><span>40</span><span>2</span></span> = 20</p>
+      <div class="formula o b" data-b="7"><p class="f">20 pekerja</p><p class="d">Agar pengecatan selesai dalam 2 hari</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 TEBAK -->
+<section class="slide" id="s14" data-title="Senilai atau berbalik nilai?" hidden>
+  <p class="eyebrow">Ayo tebak</p>
+  <h2>Ini termasuk senilai atau berbalik nilai?</h2>
+  <div class="rows" id="game"></div>
+  <p class="score" id="score">Skor: 0 dari 5</p>
+</section>
+
+<!-- 15 LATIHAN -->
+<section class="slide" id="s15" data-title="Latihan soal" hidden>
+  <p class="eyebrow">Latihan soal</p>
+  <h2>Coba kerjakan sendiri</h2>
+  <div class="cols3">
+    <div class="card"><span class="tag">Soal 1</span>
+      <p>Harga 4 buku tulis Rp 20.000. Berapa harga 10 buku tulis?</p>
+      <div class="ans"><span>Rp</span> <input class="num-in" id="e1" inputmode="decimal" autocomplete="off" aria-label="Jawaban soal 1"></div>
+      <button class="btn" type="button" data-chk="e1" data-ans="50000">Periksa</button><p class="fb" id="f-e1"></p>
+      <details><summary>Pembahasan</summary><p>Senilai. 4/10 = 20.000/x, maka 4x = 200.000, jadi x = 50.000.</p></details></div>
+    <div class="card"><span class="tag o">Soal 2</span>
+      <p>Sebuah sepeda motor menempuh perjalanan dalam 3 jam dengan kecepatan 40 km/jam. Jika kecepatannya 60 km/jam, berapa jam waktu yang dibutuhkan?</p>
+      <div class="ans"><input class="num-in" id="e2" inputmode="decimal" autocomplete="off" aria-label="Jawaban soal 2"> <span>jam</span></div>
+      <button class="btn o" type="button" data-chk="e2" data-ans="2">Periksa</button><p class="fb" id="f-e2"></p>
+      <details><summary>Pembahasan</summary><p>Berbalik nilai. 40/60 = x/3, maka 60x = 120, jadi x = 2.</p></details></div>
+    <div class="card"><span class="tag">Soal 3</span>
+      <p>Sebuah mobil menghabiskan 2 liter bensin untuk menempuh 24 km. Berapa liter bensin untuk menempuh 60 km?</p>
+      <div class="ans"><input class="num-in" id="e3" inputmode="decimal" autocomplete="off" aria-label="Jawaban soal 3"> <span>liter</span></div>
+      <button class="btn" type="button" data-chk="e3" data-ans="5">Periksa</button><p class="fb" id="f-e3"></p>
+      <details><summary>Pembahasan</summary><p>Senilai. 2/x = 24/60, maka 24x = 120, jadi x = 5.</p></details></div>
+  </div>
+</section>
+
+<!-- 16 RANGKUMAN -->
+<section class="slide" id="s16" data-title="Rangkuman" hidden>
+  <p class="eyebrow">Rangkuman</p>
+  <h2>Yang perlu diingat</h2>
+  <div class="cols">
+    <div class="card a b" data-b="1"><h3 style="color:var(--blue)">Senilai</h3><ul class="cl"><li>Searah: naik bersama atau turun bersama</li><li>Hasil bagi y ÷ x tetap, rumus y = kx</li><li>Grafik garis lurus dari (0, 0)</li><li>Susun pecahan dengan urutan sama</li></ul></div>
+    <div class="card o b" data-b="2"><h3 style="color:var(--orange)">Berbalik nilai</h3><ul class="cl"><li>Berlawanan: satu naik, yang lain turun</li><li>Hasil kali x × y tetap, rumus y = k ÷ x</li><li>Grafik kurva turun</li><li>Salah satu pecahan dibalik</li></ul></div>
+  </div>
+  <p class="final b" data-b="3">Tiga langkah: buat perbandingan, kali silang, hitung nilai x.</p>
+  <div class="cols b" data-b="4">
+    <div class="card"><span class="tag">Jawaban masalah 1</span><p>30 permen harganya <b>Rp 20.000</b> (senilai).</p></div>
+    <div class="card"><span class="tag o">Jawaban masalah 2</span><p>Dibutuhkan <b>20 pekerja</b> agar selesai dalam 2 hari (berbalik nilai).</p></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="bar-nav" aria-label="Navigasi slide">
+  <div class="menu" id="menu" hidden></div>
+  <button class="nb ghost" id="prev" type="button" aria-label="Sebelumnya">◀</button>
+  <button class="nb ghost hide-s" id="menuBtn" type="button" aria-expanded="false">Daftar</button>
+  <span class="count" id="count">1 / 16</span>
+  <div class="pbar"><i id="pg"></i></div>
+  <button class="nb ghost hide-s" id="fs" type="button">Layar penuh</button>
+  <button class="nb ghost" id="themeBtn" type="button" aria-label="Ganti tema">Tema</button>
+  <button class="nb" id="next" type="button" aria-label="Berikutnya">Lanjut ▶</button>
+</nav>
+
+<script>
+(function () {
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function rep(cls, n, step) { var h = ""; for (var i = 0; i < n; i++) h += '<div class="' + cls + '" style="animation-delay:' + (i * step) + 'ms"></div>'; return h; }
+  function rupiah(v) { return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  var PK = [2, 4, 5, 8, 10, 20];
+
+  /* ---------- slide 4: pecahan ---------- */
+  var fkBtns = $$("#fk button");
+  function pecahan(k) {
+    var n = 2 * k, d = 3 * k, h1 = "", h2 = "", i;
+    for (i = 0; i < 3; i++) h1 += '<span class="' + (i < 2 ? "f" : "") + '"></span>';
+    for (i = 0; i < d; i++) h2 += '<span class="' + (i < n ? "f" : "") + '"></span>';
+    $("#bar1").innerHTML = h1; $("#bar2").innerHTML = h2;
+    $("#frR").textContent = "2/3 = (2 × " + k + ")/(3 × " + k + ") = " + n + "/" + d;
+    fkBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.k === k)); });
+  }
+  fkBtns.forEach(function (b) { b.addEventListener("click", function () { pecahan(+b.dataset.k); }); });
+  pecahan(1);
+
+  /* ---------- slide 5: animasi permen ---------- */
+  var L5 = [3, 6, 9, 12, 21, 30], i5 = 0;
+  function show5() {
+    var n = L5[i5 % L5.length], k = n / 3 * 2;
+    $("#n5").textContent = n; $("#h5").textContent = rupiah(k * 1000);
+    $("#c5").innerHTML = rep("candy", n, 30); $("#k5").innerHTML = rep("coin", k, 40); i5++;
+  }
+  /* ---------- slide 6: slider permen ---------- */
+  var rg6 = $("#rg6");
+  function permen6() {
+    var n = +rg6.value, k = n / 3 * 2;
+    $("#n6").textContent = n; $("#h6").textContent = rupiah(k * 1000);
+    $("#c6").innerHTML = rep("candy", n, 15); $("#k6").innerHTML = rep("coin", k, 25);
+    $("#r6").textContent = "harga ÷ permen = " + rupiah(k * 1000) + " ÷ " + n + " = 666,67 (selalu sama)";
+  }
+  rg6.addEventListener("input", permen6); permen6();
+
+  /* ---------- slide 10: animasi pekerja ---------- */
+  var L10 = [2, 4, 5, 8, 10, 20], i10 = 0;
+  function show10() {
+    var n = L10[i10 % L10.length], t = 40 / n;
+    $("#n10").textContent = n; $("#t10").textContent = t;
+    $("#p10").innerHTML = rep("per", n, 40); $("#f10").style.width = (t / 20 * 100) + "%"; i10++;
+  }
+  /* ---------- slide 11: slider pekerja + grafik ---------- */
+  var pts = [];
+  for (var x = 2; x <= 20.01; x += 0.5) pts.push((40 + x * 18).toFixed(1) + "," + (250 - (40 / x) * 10.5).toFixed(1));
+  $("#crv").setAttribute("points", pts.join(" "));
+  var rp11 = $("#rp11");
+  function kerja11() {
+    var n = PK[+rp11.value], t = 40 / n;
+    $("#n11").textContent = n; $("#t11").textContent = t;
+    $("#gp").setAttribute("cx", 40 + n * 18); $("#gp").setAttribute("cy", 250 - t * 10.5);
+    $("#r11").textContent = "pekerja × hari = " + n + " × " + t + " = 40 (selalu tetap)";
+  }
+  rp11.addEventListener("input", kerja11); kerja11();
+
+  /* ---------- pilihan slide 8 ---------- */
+  $$("#q8 button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var ok = b.dataset.v === "naik", fb = $("#f-q8");
+      $$("#q8 button").forEach(function (x) { x.classList.remove("good", "wrong"); });
+      b.classList.add(ok ? "good" : "wrong");
+      fb.className = "fb " + (ok ? "ok" : "bad");
+      fb.textContent = ok ? "Tepat. Permen makin banyak, harganya ikut naik." : "Belum tepat. Coba pikirkan lagi: beli lebih banyak, bayar lebih banyak atau lebih sedikit?";
+    });
+  });
+
+  /* ---------- permainan tebak ---------- */
+  var items = [
+    { q: "Banyak permen dan uang yang dibayar", a: "senilai", w: "Permen makin banyak, uang yang dibayar ikut naik." },
+    { q: "Banyak pekerja dan lama mengecat SMPIT Ibadurrahman", a: "berbalik", w: "Pekerja bertambah, waktu mengecat berkurang." },
+    { q: "Luas dinding yang dicat dan banyak cat yang dipakai", a: "senilai", w: "Dinding makin luas, cat yang dipakai ikut bertambah." },
+    { q: "Banyak siswa penerima 30 permen dan permen yang didapat tiap siswa", a: "berbalik", w: "Siswa makin banyak, bagian tiap siswa makin sedikit." },
+    { q: "Kecepatan sepeda motor dan waktu menempuh 60 km", a: "berbalik", w: "Makin cepat, waktunya makin singkat." }
+  ], done = 0, good = 0, box = $("#game");
+  items.forEach(function (it) {
+    var d = document.createElement("div"); d.className = "gq";
+    d.innerHTML = '<p class="t">' + it.q + '</p><div class="chips"><button type="button" data-v="senilai">Senilai</button><button type="button" data-v="berbalik">Berbalik nilai</button></div><p class="fb"></p>';
+    var fb = $(".fb", d), btns = $$("button", d);
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var ok = b.dataset.v === it.a;
+        btns.forEach(function (x) { x.disabled = true; if (x.dataset.v === it.a) x.classList.add("good"); });
+        if (!ok) b.classList.add("wrong");
+        fb.className = "fb " + (ok ? "ok" : "bad");
+        fb.textContent = (ok ? "Tepat. " : "Belum tepat. ") + it.w;
+        done++; if (ok) good++;
+        $("#score").textContent = "Skor: " + good + " dari " + items.length + (done === items.length ? ". Selesai." : "");
+      });
+    });
+    box.appendChild(d);
+  });
+
+  /* ---------- periksa isian ---------- */
+  $$("[data-chk]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var el = $("#" + b.dataset.chk), fb = $("#f-" + b.dataset.chk), v = el.value.trim().replace(/\./g, "").replace(",", ".");
+      if (v === "") { fb.className = "fb"; fb.textContent = "Isi jawabanmu dulu."; el.classList.remove("ok", "bad"); return; }
+      var ok = parseFloat(v) === parseFloat(b.dataset.ans);
+      el.classList.toggle("ok", ok); el.classList.toggle("bad", !ok);
+      fb.className = "fb " + (ok ? "ok" : "bad");
+      fb.textContent = ok ? "Tepat." : "Belum tepat. Cek jenis perbandingannya, lalu ulangi tiga langkah.";
+    });
+  });
+
+  /* ---------- mesin slide ---------- */
+  var slides = $$(".slide"), cur = 0, bl = 0, stage = $("#stage"), menu = $("#menu"), loops = { 4: [show5, 2400], 9: [show10, 2800] }, timer = null;
+  function maxB(s) { var m = 0; $$(".b", s).forEach(function (e) { if (e.dataset.b) m = Math.max(m, +e.dataset.b); }); return m; }
+  function stopLoop() { if (timer) { clearInterval(timer); timer = null; } }
+  function render() {
+    stopLoop();
+    slides.forEach(function (s, i) { s.hidden = i !== cur; });
+    var s = slides[cur];
+    $$(".b", s).forEach(function (e) { e.classList.toggle("on", !e.dataset.b || +e.dataset.b <= bl); });
+    $("#count").textContent = (cur + 1) + " / " + slides.length;
+    $("#pg").style.width = ((cur + 1) / slides.length * 100) + "%";
+    $("#prev").disabled = cur === 0 && bl === 0;
+    $("#next").disabled = cur === slides.length - 1 && bl >= maxB(s);
+    $$("#menu button").forEach(function (b, i) { b.classList.toggle("on", i === cur); });
+    stage.scrollTop = 0;
+    s.classList.remove("enter"); void s.offsetWidth; s.classList.add("enter");
+    if (loops[cur]) { loops[cur][0](); timer = setInterval(loops[cur][0], loops[cur][1]); }
+  }
+  function next() {
+    var s = slides[cur];
+    if (bl < maxB(s)) { bl++; $$(".b", s).forEach(function (e) { e.classList.toggle("on", !e.dataset.b || +e.dataset.b <= bl); }); updBtns(); return; }
+    if (cur < slides.length - 1) { cur++; bl = 0; render(); }
+  }
+  function prev() {
+    if (bl > 0) { bl--; var s = slides[cur]; $$(".b", s).forEach(function (e) { e.classList.toggle("on", !e.dataset.b || +e.dataset.b <= bl); }); updBtns(); return; }
+    if (cur > 0) { cur--; bl = maxB(slides[cur]); render(); }
+  }
+  function updBtns() {
+    $("#prev").disabled = cur === 0 && bl === 0;
+    $("#next").disabled = cur === slides.length - 1 && bl >= maxB(slides[cur]);
+  }
+  function goto(i) { cur = i; bl = 0; menu.hidden = true; $("#menuBtn").setAttribute("aria-expanded", "false"); render(); }
+  slides.forEach(function (s, i) {
+    var b = document.createElement("button"); b.type = "button"; b.textContent = (i + 1) + ". " + s.dataset.title;
+    b.addEventListener("click", function () { goto(i); }); menu.appendChild(b);
+  });
+  $("#next").addEventListener("click", next); $("#prev").addEventListener("click", prev);
+  $$("[data-go]").forEach(function (b) { b.addEventListener("click", next); });
+  $("#menuBtn").addEventListener("click", function () { menu.hidden = !menu.hidden; this.setAttribute("aria-expanded", String(!menu.hidden)); });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target, typing = t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    if (e.key === "ArrowRight" || e.key === "PageDown") { if (!(typing && e.key === "ArrowRight") && t.type !== "range") { e.preventDefault(); next(); } }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { if (!typing && t.type !== "range") { e.preventDefault(); prev(); } }
+    else if (e.key === "Home" && !typing) { goto(0); }
+    else if (e.key === "End" && !typing) { goto(slides.length - 1); bl = maxB(slides[cur]); render(); }
+    else if (e.key === "Escape") { menu.hidden = true; }
+  });
+  var tx = 0, ty = 0, tOk = false;
+  stage.addEventListener("touchstart", function (e) { var t = e.target; tOk = !t.closest("input,button,.menu,details,svg"); tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener("touchend", function (e) {
+    if (!tOk) return; var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 70 && Math.abs(dy) < 50) { dx < 0 ? next() : prev(); }
+  }, { passive: true });
+
+  $("#themeBtn").addEventListener("click", function () {
+    var r = document.documentElement, dark = r.getAttribute("data-theme") === "dark" ||
+      (!r.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    r.setAttribute("data-theme", dark ? "light" : "dark");
+  });
+  $("#fs").addEventListener("click", function () {
+    try {
+      if (document.fullscreenElement) { document.exitFullscreen(); }
+      else { var p = document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(function () {}); }
+    } catch (e) {}
+  });
+
+  var m = /^#s(\d+)$/.exec(location.hash || "");
+  if (m && +m[1] >= 1 && +m[1] <= slides.length) cur = +m[1] - 1;
+  render();
+})();
+</script>
+
+</body></html>
